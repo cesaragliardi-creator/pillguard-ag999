@@ -1,785 +1,163 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PillGuard AG-999 — Simulador de Pilling Têxtil</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<title>PillGuard AG-999</title>
+
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
-:root {
-  --bg:#0b0e14; --bg2:#111520; --bg3:#181d2a;
-  --border:#1e2535; --border2:#2a3348;
-  --text:#e2e8f0; --muted:#6b7a99; --faint:#3a4460;
-  --purple:#7c6fe0; --purple-l:#a89ff0; --purple-d:#4f46e5; --purple-bg:#1a1830;
-  --teal:#1db975; --teal-l:#6edea8; --teal-d:#0e6e48; --teal-bg:#0a1f16;
-  --amber:#f59e0b; --amber-l:#fcd34d; --amber-bg:#1e1500;
-  --coral:#e85d3b; --coral-bg:#1f0f0a;
-  --blue:#3b8add; --blue-bg:#0d1a2e;
-  --class1:#e24b4a; --class2:#e8763b; --class3:#f59e0b; --class4:#1db975; --class5:#3b8add;
-  --radius:8px; --mono:'JetBrains Mono',monospace; --sans:'DM Sans',sans-serif;
+body {
+  font-family: Arial, sans-serif;
+  margin: 40px;
+  background: #0f172a;
+  color: #e2e8f0;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;}
-.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.logo{display:flex;align-items:center;gap:12px;}
-.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--purple-d),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;color:white;letter-spacing:-0.5px;}
-.logo-name{font-size:16px;font-weight:600;color:var(--text);}
-.logo-name span{color:var(--purple-l);}
-.logo-sub{font-size:10px;color:var(--muted);font-family:var(--mono);}
-.topbar-metrics{display:flex;gap:20px;align-items:center;}
-.tm{text-align:center;}
-.tm-val{font-family:var(--mono);font-size:18px;font-weight:700;}
-.tm-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:blink 1.5s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.live-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--teal);font-weight:600;}
-.nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:4px;overflow-x:auto;}
-.nav::-webkit-scrollbar{display:none;}
-.nav-btn{padding:12px 16px;border:none;background:none;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.15s;}
-.nav-btn:hover{color:var(--text);}
-.nav-btn.active{color:var(--purple-l);border-bottom-color:var(--purple);}
-.content{padding:24px;max-width:1400px;margin:0 auto;}
-.section{display:none;} .section.active{display:block;}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
-.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-.g-sim{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start;}
-.card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
-.card-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;}
-.card-title span{font-family:var(--mono);color:var(--purple);}
-.metric-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
-.metric-val{font-family:var(--mono);font-size:28px;font-weight:700;line-height:1;margin-bottom:4px;}
-.metric-lbl{font-size:11px;color:var(--muted);}
-.metric-delta{font-size:11px;font-weight:600;margin-top:4px;}
-.pilling-display{text-align:center;padding:20px;}
-.class-ring{width:120px;height:120px;border-radius:50%;margin:0 auto 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid;position:relative;}
-.class-ring-num{font-family:var(--mono);font-size:40px;font-weight:700;line-height:1;}
-.class-ring-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
-.class-iso{font-size:11px;color:var(--muted);font-family:var(--mono);}
-.iso-1{color:var(--class1);border-color:var(--class1);background:rgba(226,75,74,0.08);}
-.iso-2{color:var(--class2);border-color:var(--class2);background:rgba(232,118,59,0.08);}
-.iso-3{color:var(--class3);border-color:var(--class3);background:rgba(245,158,11,0.08);}
-.iso-4{color:var(--class4);border-color:var(--class4);background:rgba(29,185,117,0.08);}
-.iso-5{color:var(--class5);border-color:var(--class5);background:rgba(59,138,221,0.08);}
-.dm-gauge{margin:16px 0;}
-.dm-track{background:var(--bg);border-radius:4px;height:10px;overflow:hidden;position:relative;}
-.dm-fill{height:100%;border-radius:4px;transition:width 0.6s ease,background 0.6s ease;}
-.dm-ticks{display:flex;justify-content:space-between;font-size:9px;color:var(--faint);margin-top:4px;font-family:var(--mono);}
-.dm-zones{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px;}
-.dm-zone{padding:5px 8px;border-radius:5px;border:1px solid;font-size:10px;font-weight:600;text-align:center;}
-.dz-inactive{background:var(--teal-bg);border-color:var(--teal-d);color:var(--teal);}
-.dz-attn{background:var(--amber-bg);border-color:#7a4d00;color:var(--amber);}
-.dz-supp{background:#1f1500;border-color:#8b3e10;color:var(--coral);}
-.dz-block{background:var(--coral-bg);border-color:#7a1a0e;color:#f87171;}
-.param-group-title{font-size:10px;font-weight:600;color:var(--purple-l);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;}
-.param-row{margin-bottom:10px;}
-.param-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
-.param-name{font-size:12px;color:var(--text);}
-.param-val{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--purple-l);min-width:60px;text-align:right;}
-.param-slider{width:100%;height:4px;-webkit-appearance:none;background:var(--border2);border-radius:2px;outline:none;cursor:pointer;}
-.param-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--purple);border:2px solid var(--bg);cursor:pointer;transition:background 0.15s;}
-.param-slider::-webkit-slider-thumb:hover{background:var(--purple-l);}
-.param-desc{font-size:10px;color:var(--muted);margin-top:2px;}
-.param-select{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;color:var(--text);font-family:var(--sans);font-size:12px;outline:none;cursor:pointer;}
-.param-select:focus{border-color:var(--purple);}
-.influence-row{margin-bottom:10px;}
-.inf-header{display:flex;justify-content:space-between;margin-bottom:4px;}
-.inf-name{font-size:12px;color:var(--text);}
-.inf-pct{font-family:var(--mono);font-size:12px;font-weight:700;}
-.inf-track{background:var(--bg);border-radius:3px;height:7px;overflow:hidden;}
-.inf-fill{height:100%;border-radius:3px;transition:width 0.8s ease;}
-.regime-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:var(--mono);}
-.rb-inactive{background:var(--teal-bg);border:1px solid var(--teal-d);color:var(--teal);}
-.rb-attn{background:var(--amber-bg);border:1px solid #6b3d00;color:var(--amber);}
-.rb-supp{background:#1f1200;border:1px solid #7a3a10;color:var(--coral);}
-.rb-block{background:var(--coral-bg);border:1px solid #7a0e0e;color:#f87171;}
-.data-table{width:100%;border-collapse:collapse;}
-.data-table th{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);}
-.data-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;}
-.data-table tr:last-child td{border-bottom:none;}
-.data-table tr:hover td{background:var(--bg2);}
-.data-table .mono{font-family:var(--mono);}
-.formula-block{background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:14px 16px;font-family:var(--mono);font-size:12px;color:var(--purple-l);line-height:1.9;margin-bottom:12px;}
-.formula-comment{color:var(--muted);}
-.formula-key{color:var(--teal-l);}
-.formula-val{color:var(--amber-l);}
-.chart-wrap{position:relative;height:240px;}
-.sec-header{margin-bottom:20px;}
-.sec-title{font-size:20px;font-weight:600;margin-bottom:4px;}
-.sec-sub{font-size:13px;color:var(--muted);}
-.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;}
-.iso-scale{display:flex;gap:4px;margin:10px 0;}
-.iso-step{flex:1;height:6px;border-radius:3px;background:var(--border);transition:background 0.4s;}
-.iso-step.active-1{background:var(--class1);}
-.iso-step.active-2{background:var(--class2);}
-.iso-step.active-3{background:var(--class3);}
-.iso-step.active-4{background:var(--class4);}
-.iso-step.active-5{background:var(--class5);}
-.cross-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
-.cross-item{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;}
-.cross-formula{font-family:var(--mono);font-size:11px;color:var(--amber);margin-bottom:3px;}
-.cross-desc{font-size:10px;color:var(--muted);}
-.cross-val{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--purple-l);margin-top:4px;}
-.sim-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--purple-d),var(--purple));border:none;border-radius:8px;color:white;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;transition:opacity 0.15s;}
-.sim-btn:hover{opacity:0.9;}
-.sim-btn:active{transform:scale(0.98);}
-.hist-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;}
-.hist-item:hover{background:var(--bg2);}
-.hist-item:last-child{border-bottom:none;}
-.hist-class{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;font-weight:700;flex-shrink:0;}
-.hist-info{flex:1;}
-.hist-name{font-size:13px;font-weight:500;}
-.hist-meta{font-size:10px;color:var(--muted);font-family:var(--mono);}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--purple);border-radius:8px;padding:10px 18px;font-size:13px;color:var(--text);z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
-.toast.show{opacity:1;}
-.sep{border:none;border-top:1px solid var(--border);margin:16px 0;}
-@media(max-width:900px){.g-sim{grid-template-columns:1fr;}.g2,.g3,.g4{grid-template-columns:1fr 1fr;}.topbar-metrics{display:none;}.content{padding:16px;}}
-@media(max-width:560px){.g2,.g3,.g4,.cross-grid{grid-template-columns:1fr;}}
+
+h1 {
+  color: #38bdf8;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.card {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.slider {
+  width: 100%;
+}
+
+.result {
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+.bar {
+  height: 10px;
+  background: #38bdf8;
+  margin-top: 5px;
+}
+
 </style>
 </head>
+
 <body>
 
-<div class="topbar">
-  <div class="logo">
-    <div class="logo-icon">PG</div>
-    <div>
-      <div class="logo-name">Pill<span>Guard</span></div>
-      <div class="logo-sub">AG-999 Textile Engine · v2026</div>
-    </div>
-  </div>
-  <div class="topbar-metrics">
-    <div class="tm"><div class="tm-val" id="h-class" style="color:var(--class3)">3.2</div><div class="tm-lbl">Classe ISO</div></div>
-    <div class="tm"><div class="tm-val" id="h-d2" style="color:var(--purple-l)">0.412</div><div class="tm-lbl">D/M* Ratio</div></div>
-    <div class="tm"><div class="tm-val" id="h-op" style="color:var(--teal)">0.834</div><div class="tm-lbl">O(D²)</div></div>
-    <div class="live-row"><div class="live-dot"></div>LIVE</div>
-  </div>
+<h1>PillGuard AG-999</h1>
+
+<div class="container">
+
+<div class="card">
+<h3>Parameters</h3>
+
+<label>Fiber Quality</label>
+<input type="range" min="0" max="10" value="5" id="fiber" class="slider">
+
+<label>Yarn Structure</label>
+<input type="range" min="0" max="10" value="5" id="yarn" class="slider">
+
+<label>Fabric Density</label>
+<input type="range" min="0" max="10" value="5" id="fabric" class="slider">
+
+<label>Finishing Treatment</label>
+<input type="range" min="0" max="10" value="5" id="finish" class="slider">
+
 </div>
 
-<div class="nav">
-  <button class="nav-btn active" onclick="setSection('sim',this)">Simulador</button>
-  <button class="nav-btn" onclick="setSection('dash',this)">Dashboard</button>
-  <button class="nav-btn" onclick="setSection('analysis',this)">Análise AG-999</button>
-  <button class="nav-btn" onclick="setSection('history',this)">Histórico</button>
-  <button class="nav-btn" onclick="setSection('engine',this)">Motor</button>
+<div class="card">
+<h3>Results</h3>
+
+<div class="result" id="iso"></div>
+<div class="result" id="score"></div>
+
+<h4>Trade-offs</h4>
+<div id="cost"></div>
+<div id="energy"></div>
+<div id="comfort"></div>
+
+<h4>Parameter Influence</h4>
+<div>Fiber<div class="bar" id="fiberBar"></div></div>
+<div>Yarn<div class="bar" id="yarnBar"></div></div>
+<div>Fabric<div class="bar" id="fabricBar"></div></div>
+<div>Finishing<div class="bar" id="finishBar"></div></div>
+
 </div>
 
-<div class="content">
-
-<!-- SIMULADOR -->
-<div class="section active" id="sec-sim">
-  <div class="sec-header">
-    <div class="sec-title">Simulador de Cenários</div>
-    <div class="sec-sub">Ajuste os parâmetros de cada estágio e preveja a classe de pilling ISO 12945-2</div>
-  </div>
-  <div class="g-sim">
-    <div>
-      <!-- E1 FIAÇÃO -->
-      <div class="card" style="margin-bottom:14px;">
-        <div class="param-group-title">
-          <span style="background:var(--purple-bg);border:1px solid var(--purple-d);border-radius:4px;padding:1px 7px;font-family:var(--mono);font-size:10px;">E1</span>
-          Fiação
-        </div>
-        <div class="param-row">
-          <div class="param-label"><span class="param-name">% Poliéster</span><span class="param-val" id="v-poly">55%</span></div>
-          <input type="range" class="param-slider" id="s-poly" min="30" max="80" value="55" oninput="document.getElementById('v-poly').textContent=this.value+'%';recalc()">
-          <div class="param-desc">Proporção dominante — alta correlação com pilling</div>
-        </div>
-        <div class="param-row">
-          <div class="param-label"><span class="param-name">Torção do fio (TPM)</span><span class="param-val" id="v-twist">650</span></div>
-          <input type="range" class="param-slider" id="s-twist" min="300" max="1200" value="650" oninput="document.getElementById('v-twist').textContent=this.value;recalc()">
-          <div class="param-desc">Torções por metro — maior torção reduz pilling</div>
-        </div>
-        <div class="param-row">
-          <div class="param-label"><span class="param-name">Finura da fibra (dtex)</span><span class="param-val" id="v-dtex">1.4</span></div>
-          <input type="range" class="param-slider" id="s-dtex" min="8" max="30" value="14" oninput="document.getElementById('v-dtex').textContent=(this.value/10).toFixed(1);recalc()">
-          <div class="param-desc">Fibras mais finas → maior tendência a pilling</div>
-        </div>
-        <div class="param-row">
-          <div class="param-label"><span class="param-name">Tipo de blend</span></div>
-          <select class="param-select" id="s-fiber" onchange="recalc()">
-            <option value="0.9">PES/Viscose (padrão)</option>
-            <option value="1.0">100% Poliéster</option>
-            <option value="0.7">PES/Lã</option>
-            <option value="0.6">PES/Viscose/Elastano</option>
-            <option value="0.5">PES/Algodão</option>
-          </select>
-        </div>
-      </div>
-      <!-- E2 TECELAGEM -->
-      <div class="card" style="margin-bottom:14px;">
-        <div class="param-group-title">
-          <span style="background:var(--teal-bg);border:1px solid var(--teal-d);border-radius:4px;padding:1px 7px;font-family:var(--mono);font-size:10px;color:var(--teal)">E2</span>
-          Tecelagem
-        </div>
-        <div class="param-row">
-          <div class="param-label"><span class="param-name">Densidade da trama (fios/cm)</span><span class="param-val" id="v-weft">24</span></div>
-          <input type="range" class="param-slider" id="s-weft" min="10" max="50" value="24" oninput="document.getElementById('v-weft').textContent=this.value;recalc()">
-        </div>
-        <div class="param-row">
-          <div class="param-label"><span class="param-name">Densidade do urdume (fios/cm)</span><span class="param-val" id="v-warp">28</span></div>
-          <input type="range" class="param-slider" id="s-warp" min="10" max="60" value="28" oninput="document.getElementById('v-warp').textContent=this.value;recalc()">
-        </div>
-        <div class="param-row">
-          <div class="param-label"><span class="param-name">Massa (g/m²)</span><span class="param-val" id="v-gsm">180</span></div>
-          <input type="range" class="param-slider" id="s-gsm" min="80" max="400" value="180" oninput="document.getElementById('v-gsm').textContent=this.value;recalc()">
-        </div>
-        <div class="param-row">
-          <div class="param-label"><span class="param-name">Armação do tecido</span></div>
-          <select class="param-select" id="s-weave" onchange="recalc()">
-            <option value="0.3">Tafetá (plain)</option>
-            <option value="0.5" selected>Sarja (twill)</option>
-            <option value="0.7">Cetim (satin)</option>
-            <option value="0.6">Jacquard</option>
-          </select>
-        </div>
-      </div>
-      <!-- E3 TINTURARIA -->
-      <div class="card" style="margin-bottom:14px;">
-        <div class="param-group-title">
-          <span style="background:var(--blue-bg);border:1px solid #1a3a6b;border-radius:4px;padding:1px 7px;font-family:var(--mono);font-size:10px;color:var(--blue);">E3</span>
-          Tinturaria
-        </div>
-        <div class="param-row">
-          <div class="param-label"><span class="param-name">Temperatura de tintura (°C)</span><span class="param-val" id="v-dye-t">130</span></div>
-          <input type="range" class="param-slider" id="s-dye-t" min="80" max="145" value="130" oninput="document.getElementById('v-dye-t').textContent=this.value;recalc()">
-          <div class="param-desc">Altas temperaturas podem fragilizar fibras</div>
-        </div>
-        <div class="param-row">
-          <div class="param-label"><span class="param-name">pH do banho</span><span class="param-val" id="v-ph">5.5</span></div>
-          <input type="range" class="param-slider" id="s-ph" min="40" max="80" value="55" oninput="document.getElementById('v-ph').textContent=(this.value/10).toFixed(1);recalc()">
-        </div>
-      </div>
-      <!-- E4 ACABAMENTO -->
-      <div class="card" style="margin-bottom:14px;">
-        <div class="param-group-title">
-          <span style="background:var(--amber-bg);border:1px solid #6b3d00;border-radius:4px;padding:1px 7px;font-family:var(--mono);font-size:10px;color:var(--amber);">E4</span>
-          Acabamento
-        </div>
-        <div class="param-row">
-          <div class="param-label"><span class="param-name">Tratamento antifrizz</span><span class="param-val" id="v-anti">Médio</span></div>
-          <input type="range" class="param-slider" id="s-anti" min="0" max="3" step="1" value="1" oninput="const l=['Nenhum','Médio','Alto','Premium'];document.getElementById('v-anti').textContent=l[this.value];recalc()">
-          <div class="param-desc">Agente antifrizz reduz significativamente pilling</div>
-        </div>
-        <div class="param-row">
-          <div class="param-label"><span class="param-name">Sanforização / Estabilização (°C)</span><span class="param-val" id="v-sanf">160</span></div>
-          <input type="range" class="param-slider" id="s-sanf" min="120" max="220" value="160" oninput="document.getElementById('v-sanf').textContent=this.value;recalc()">
-        </div>
-        <div class="param-row">
-          <div class="param-label"><span class="param-name">Acabamento mecânico</span></div>
-          <select class="param-select" id="s-mech" onchange="recalc()">
-            <option value="0.0">Nenhum</option>
-            <option value="0.3">Esmerilhamento leve</option>
-            <option value="0.6" selected>Peachskin médio</option>
-            <option value="0.9">Esmerilhamento intenso</option>
-          </select>
-        </div>
-        <button class="sim-btn" onclick="simulate()">Simular e Salvar Resultado</button>
-      </div>
-    </div>
-
-    <!-- RESULTS PANEL -->
-    <div>
-      <div class="card" style="margin-bottom:14px;">
-        <div class="card-title">Resultado · <span>ISO 12945-2</span></div>
-        <div class="pilling-display">
-          <div class="class-ring iso-3" id="class-ring">
-            <div class="class-ring-num" id="class-num">3.2</div>
-            <div class="class-ring-lbl">Classe ISO</div>
-          </div>
-          <div class="iso-scale" id="iso-scale">
-            <div class="iso-step"></div><div class="iso-step"></div>
-            <div class="iso-step"></div><div class="iso-step"></div>
-            <div class="iso-step"></div>
-          </div>
-          <div class="class-iso" id="class-label">Pilling MODERADO · No limite ISO</div>
-          <div style="margin-top:10px;">
-            <div class="regime-badge rb-attn" id="regime-badge">
-              <span class="live-dot" style="background:var(--amber)"></span>
-              ATTENUATING · Monitorar
-            </div>
-          </div>
-        </div>
-        <hr class="sep">
-        <div style="margin-bottom:12px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <span style="font-size:11px;color:var(--muted);">D/M* Ratio</span>
-            <span style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--purple-l)" id="dm-val">0.412</span>
-          </div>
-          <div class="dm-track"><div class="dm-fill" id="dm-fill" style="width:27%;background:var(--amber)"></div></div>
-          <div class="dm-ticks"><span>0</span><span>0.3</span><span>0.8</span><span>1.2</span><span>1.5+</span></div>
-          <div class="dm-zones">
-            <div class="dm-zone dz-inactive">INACTIVE<br><span style="font-size:9px;font-weight:400">&lt;0.3</span></div>
-            <div class="dm-zone dz-attn">ATTN<br><span style="font-size:9px;font-weight:400">0.3–0.8</span></div>
-            <div class="dm-zone dz-supp">SUPP<br><span style="font-size:9px;font-weight:400">0.8–1.2</span></div>
-            <div class="dm-zone dz-block">BLOCK<br><span style="font-size:9px;font-weight:400">&gt;1.2</span></div>
-          </div>
-        </div>
-        <hr class="sep">
-        <div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-            <span style="font-size:11px;color:var(--muted)">O(D²) — operador supressor</span>
-            <span style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--teal)" id="op-val">0.834</span>
-          </div>
-          <div class="dm-track"><div class="dm-fill" id="op-fill" style="width:83%;background:var(--teal)"></div></div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px;">Alto O(D²) = tecido bem protegido contra pilling</div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:14px;">
-        <div class="card-title">Influência Relativa · <span>por estágio</span></div>
-        <div class="influence-row">
-          <div class="inf-header"><span class="inf-name">E1 · Fiação</span><span class="inf-pct" style="color:var(--purple-l)" id="inf-e1">38%</span></div>
-          <div class="inf-track"><div class="inf-fill" id="if-e1" style="width:38%;background:var(--purple)"></div></div>
-        </div>
-        <div class="influence-row">
-          <div class="inf-header"><span class="inf-name">E2 · Tecelagem</span><span class="inf-pct" style="color:var(--teal)" id="inf-e2">25%</span></div>
-          <div class="inf-track"><div class="inf-fill" id="if-e2" style="width:25%;background:var(--teal)"></div></div>
-        </div>
-        <div class="influence-row">
-          <div class="inf-header"><span class="inf-name">E3 · Tinturaria</span><span class="inf-pct" style="color:var(--blue)" id="inf-e3">15%</span></div>
-          <div class="inf-track"><div class="inf-fill" id="if-e3" style="width:15%;background:var(--blue)"></div></div>
-        </div>
-        <div class="influence-row">
-          <div class="inf-header"><span class="inf-name">E4 · Acabamento</span><span class="inf-pct" style="color:var(--amber)" id="inf-e4">22%</span></div>
-          <div class="inf-track"><div class="inf-fill" id="if-e4" style="width:22%;background:var(--amber)"></div></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Cross-terms AG-999 · <span>interações entre estágios</span></div>
-        <div class="cross-grid">
-          <div class="cross-item">
-            <div class="cross-formula">2·I·Y (E1×E2)</div>
-            <div class="cross-desc">Torção × Densidade</div>
-            <div class="cross-val" id="ct-iy">0.148</div>
-          </div>
-          <div class="cross-item">
-            <div class="cross-formula">2·Y·C (E2×E4)</div>
-            <div class="cross-desc">Construção × Acabamento</div>
-            <div class="cross-val" id="ct-yc">0.092</div>
-          </div>
-          <div class="cross-item">
-            <div class="cross-formula">2·I·C (E1×E4)</div>
-            <div class="cross-desc">Fibra × Acabamento</div>
-            <div class="cross-val" id="ct-ic">0.215</div>
-          </div>
-          <div class="cross-item">
-            <div class="cross-formula">D² total</div>
-            <div class="cross-desc">Índice composto AG-999</div>
-            <div class="cross-val" id="ct-d2">0.170</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
-
-<!-- DASHBOARD -->
-<div class="section" id="sec-dash">
-  <div class="sec-header">
-    <div class="sec-title">Dashboard</div>
-    <div class="sec-sub">Visão consolidada das simulações e tendências</div>
-  </div>
-  <div class="g4" style="margin-bottom:20px;">
-    <div class="metric-card">
-      <div class="metric-val" style="color:var(--class4)" id="d-avg-class">—</div>
-      <div class="metric-lbl">Classe média (simulações)</div>
-      <div class="metric-delta" style="color:var(--muted)">Execute simulações</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-val" style="color:var(--purple-l)" id="d-pass">—</div>
-      <div class="metric-lbl">Aprovadas ≥ Classe 3</div>
-      <div class="metric-delta" style="color:var(--amber)">Meta: 100%</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-val" style="color:var(--teal)" id="d-op-dash">0.834</div>
-      <div class="metric-lbl">O(D²) atual</div>
-      <div class="metric-delta" style="color:var(--muted)">Regime: ATTENUATING</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-val" style="color:var(--amber)" id="d-dm-dash">0.412</div>
-      <div class="metric-lbl">D/M* atual</div>
-      <div class="metric-delta" style="color:var(--muted)">Índice composto</div>
-    </div>
-  </div>
-  <div class="g2" style="margin-bottom:20px;">
-    <div class="card">
-      <div class="card-title">Histórico de Classes ISO</div>
-      <div class="chart-wrap"><canvas id="chart-history"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Contribuição D² por Estágio</div>
-      <div class="chart-wrap"><canvas id="chart-stages"></canvas></div>
-    </div>
-  </div>
-  <div class="g2">
-    <div class="card">
-      <div class="card-title">Radar de Parâmetros</div>
-      <div class="chart-wrap"><canvas id="chart-radar"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Torção × % PES (Cenários)</div>
-      <div class="chart-wrap"><canvas id="chart-scatter"></canvas></div>
-    </div>
-  </div>
-</div>
-
-<!-- ANÁLISE AG-999 -->
-<div class="section" id="sec-analysis">
-  <div class="sec-header">
-    <div class="sec-title">Análise do Motor AG-999</div>
-    <div class="sec-sub">Decomposição matemática da simulação atual</div>
-  </div>
-  <div class="g2" style="margin-bottom:20px;">
-    <div class="card">
-      <div class="card-title">Fórmula · <span>AG-999 adaptada para têxtil</span></div>
-      <div class="formula-block">
-        <span class="formula-comment">// Operador universal de supressão:</span><br>
-        O(D²) = exp[ <span class="formula-key">−λ</span>(D² + m²)² / M*⁴ ]<br><br>
-        <span class="formula-comment">// D² têxtil com cross-terms únicos:</span><br>
-        D² = I² + Y² + P² + C²<br>
-           + <span class="formula-val">2·I·Y</span> <span class="formula-comment">← fibra × construção</span><br>
-           + <span class="formula-val">2·Y·C</span> <span class="formula-comment">← construção × acabamento</span><br>
-           + <span class="formula-val">2·I·C</span> <span class="formula-comment">← fibra × acabamento</span>
-      </div>
-      <div class="formula-block">
-        <span class="formula-comment">// Mapeamento de variáveis:</span><br>
-        I = <span class="formula-key">Índice de fibra</span> (PES%, dtex, torção)<br>
-        Y = <span class="formula-key">Construção</span> (trama, urdume, GSM)<br>
-        P = <span class="formula-key">Processo</span> (temp. tintura, pH)<br>
-        C = <span class="formula-key">Acabamento</span> (antifrizz, mecânico)
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Valores Atuais · <span>sessão corrente</span></div>
-      <table class="data-table">
-        <thead><tr><th>Parâmetro</th><th>Símbolo</th><th>Valor</th><th>Peso</th></tr></thead>
-        <tbody>
-          <tr><td>Índice de fibra</td><td class="mono">I</td><td class="mono" id="ap-I">—</td><td class="mono" id="ap-I-c">—</td></tr>
-          <tr><td>Construção</td><td class="mono">Y</td><td class="mono" id="ap-Y">—</td><td class="mono" id="ap-Y-c">—</td></tr>
-          <tr><td>Processo dye</td><td class="mono">P</td><td class="mono" id="ap-P">—</td><td class="mono" id="ap-P-c">—</td></tr>
-          <tr><td>Acabamento</td><td class="mono">C</td><td class="mono" id="ap-C">—</td><td class="mono" id="ap-C-c">—</td></tr>
-          <tr><td>Cross I×Y</td><td class="mono">2·I·Y</td><td class="mono" id="ap-IY">—</td><td class="mono" id="ap-IY-c">—</td></tr>
-          <tr><td>Cross Y×C</td><td class="mono">2·Y·C</td><td class="mono" id="ap-YC">—</td><td class="mono" id="ap-YC-c">—</td></tr>
-          <tr><td>Cross I×C</td><td class="mono">2·I·C</td><td class="mono" id="ap-IC">—</td><td class="mono" id="ap-IC-c">—</td></tr>
-        </tbody>
-      </table>
-      <hr class="sep">
-      <div class="g2">
-        <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;">D² total</div><div style="font-family:var(--mono);font-size:24px;font-weight:700;color:var(--purple-l)" id="an-d2">—</div></div>
-        <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;">O(D²)</div><div style="font-family:var(--mono);font-size:24px;font-weight:700;color:var(--teal)" id="an-op">—</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">Campos de Memória · <span>σ-field e φ-field</span></div>
-    <div class="g2">
-      <div>
-        <div style="font-size:12px;font-weight:500;margin-bottom:8px;">σ-field — memória longa (24 meses)</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Tendências estruturais de processo: fornecedor, máquina, lote</div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:11px;color:var(--muted)">σ atual</span><span style="font-family:var(--mono);font-weight:700;color:var(--purple-l)" id="sigma-val">0.42</span></div>
-        <div class="dm-track"><div class="dm-fill" id="sigma-fill" style="width:42%;background:var(--purple)"></div></div>
-        <div style="margin-top:10px;font-size:11px;color:var(--muted);">σ &gt; 0.70 → Alerta 18 meses · σ &gt; 0.50 → 12 meses · σ ≤ 0.50 → <span style="color:var(--teal)">6 meses (atual)</span></div>
-      </div>
-      <div>
-        <div style="font-size:12px;font-weight:500;margin-bottom:8px;">φ-field — memória curta (6 meses)</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Choques recentes: troca de corante, novo lote de fibra</div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:11px;color:var(--muted)">φ atual</span><span style="font-family:var(--mono);font-weight:700;color:var(--amber)" id="phi-val">0.28</span></div>
-        <div class="dm-track"><div class="dm-fill" id="phi-fill" style="width:28%;background:var(--amber)"></div></div>
-        <div style="margin-top:10px;font-size:11px;color:var(--muted);">φ = Σ(φᵢ · e⁻ⁱ) / Σe⁻ⁱ — decaimento exponencial 6 meses</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- HISTÓRICO -->
-<div class="section" id="sec-history">
-  <div class="sec-header">
-    <div class="sec-title">Histórico de Simulações</div>
-    <div class="sec-sub">Todos os cenários testados nesta sessão</div>
-  </div>
-  <div class="g2">
-    <div class="card">
-      <div class="card-title">Simulações Recentes</div>
-      <div id="history-list"><div style="color:var(--muted);font-size:13px;padding:20px;text-align:center;">Nenhuma simulação ainda.<br>Use o Simulador para começar.</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Comparativo · <span>melhor vs. pior</span></div>
-      <div id="compare-panel" style="color:var(--muted);font-size:13px;padding:20px;text-align:center;">Execute pelo menos 2 simulações.</div>
-    </div>
-  </div>
-</div>
-
-<!-- MOTOR -->
-<div class="section" id="sec-engine">
-  <div class="sec-header">
-    <div class="sec-title">Motor AG-999 — Configurações</div>
-    <div class="sec-sub">Constantes calibradas e mapeamento de thresholds</div>
-  </div>
-  <div class="g2" style="margin-bottom:20px;">
-    <div class="card">
-      <div class="card-title">Constantes do Modelo</div>
-      <table class="data-table">
-        <thead><tr><th>Constante</th><th>Símbolo</th><th>Valor</th><th>Origem</th></tr></thead>
-        <tbody>
-          <tr><td>Gap de pilling</td><td class="mono">m_gap</td><td class="mono">0.522</td><td class="mono">Dyson-Schwinger</td></tr>
-          <tr><td>Escala GUT</td><td class="mono">M*</td><td class="mono">10¹⁶</td><td class="mono">Normalizado</td></tr>
-          <tr><td>Acoplamento</td><td class="mono">λ</td><td class="mono">13.4</td><td class="mono">Autodimensional</td></tr>
-          <tr><td>Janela longa</td><td class="mono">σ_window</td><td class="mono">24 meses</td><td class="mono">Campo σ</td></tr>
-          <tr><td>Janela curta</td><td class="mono">φ_window</td><td class="mono">6 meses</td><td class="mono">Campo φ</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="card">
-      <div class="card-title">Thresholds D/M* → Classes ISO</div>
-      <table class="data-table">
-        <thead><tr><th>Regime</th><th>D/M*</th><th>O(D²)</th><th>Classe ISO</th></tr></thead>
-        <tbody>
-          <tr><td><span class="regime-badge rb-inactive" style="padding:3px 8px;font-size:10px;">INACTIVE</span></td><td class="mono">&lt;0.30</td><td class="mono">≈0.999</td><td style="color:var(--class5)" class="mono">4–5</td></tr>
-          <tr><td><span class="regime-badge rb-attn" style="padding:3px 8px;font-size:10px;">ATTN</span></td><td class="mono">0.30–0.80</td><td class="mono">0.50–0.99</td><td style="color:var(--class3)" class="mono">3–4</td></tr>
-          <tr><td><span class="regime-badge rb-supp" style="padding:3px 8px;font-size:10px;">SUPP</span></td><td class="mono">0.80–1.20</td><td class="mono">0.08–0.50</td><td style="color:var(--class2)" class="mono">2–3</td></tr>
-          <tr><td><span class="regime-badge rb-block" style="padding:3px 8px;font-size:10px;">BLOCK</span></td><td class="mono">&gt;1.20</td><td class="mono">→0</td><td style="color:var(--class1)" class="mono">1–2</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">Pesos de Contribuição · <span>por parâmetro</span></div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;" id="weight-grid"></div>
-  </div>
-</div>
-
-</div><!-- /content -->
-<div class="toast" id="toast"></div>
 
 <script>
-const state={classISO:3.2,dm:0.412,op:0.834,D2:0.17,I:0.412,Y:0.344,P:0.198,C:0.287,history:[],params:{poly:55,twist:650,dtex:14,fiber:0.9,weft:24,warp:28,gsm:180,weave:0.5,dyeT:130,ph:5.5,anti:1,sanf:160,mech:0.6}};
 
-function setSection(id,btn){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('sec-'+id).classList.add('active');
-  btn.classList.add('active');
-  if(id==='dash') initCharts();
+function computeModel(fiber, yarn, fabric, finish){
+
+  // Base interaction model
+  const base = (fiber + yarn + fabric + finish) / 4;
+
+  const interaction = (fiber * yarn + fabric * finish) * 0.02;
+
+  const score = base + interaction;
+
+  // ISO classification
+  let iso;
+  if(score > 8) iso = 5;
+  else if(score > 6) iso = 4;
+  else if(score > 4) iso = 3;
+  else if(score > 2) iso = 2;
+  else iso = 1;
+
+  // Trade-offs
+  const cost = fiber*2 + finish*3;
+  const energy = fabric*2 + finish*2;
+  const comfort = 100 - (fabric*5 + finish*3);
+
+  // Influence (normalized)
+  const total = fiber + yarn + fabric + finish || 1;
+
+  const influence = {
+    fiber: fiber/total,
+    yarn: yarn/total,
+    fabric: fabric/total,
+    finish: finish/total
+  };
+
+  return {score, iso, cost, energy, comfort, influence};
 }
 
-function recalc(){
-  const p=state.params;
-  p.poly=+document.getElementById('s-poly').value;
-  p.twist=+document.getElementById('s-twist').value;
-  p.dtex=+document.getElementById('s-dtex').value;
-  p.fiber=+document.getElementById('s-fiber').value;
-  p.weft=+document.getElementById('s-weft').value;
-  p.warp=+document.getElementById('s-warp').value;
-  p.gsm=+document.getElementById('s-gsm').value;
-  p.weave=+document.getElementById('s-weave').value;
-  p.dyeT=+document.getElementById('s-dye-t').value;
-  p.ph=+document.getElementById('s-ph').value/10;
-  p.anti=+document.getElementById('s-anti').value;
-  p.sanf=+document.getElementById('s-sanf').value;
-  p.mech=+document.getElementById('s-mech').value;
+function update(){
 
-  const I=calcI(p),Y=calcY(p),P=calcP(p),C=calcC(p);
-  const D2=I*I+Y*Y+P*P+C*C+2*I*Y+2*Y*C+2*I*C;
-  const m2=0.272,lambda=13.4,M4=1.0;
-  const op=Math.exp(-lambda*Math.pow(D2+m2,2)/M4);
-  const dm=Math.sqrt(D2);
-  const classISO=Math.min(5,Math.max(1,1+4*op));
+  const fiber = +document.getElementById("fiber").value;
+  const yarn = +document.getElementById("yarn").value;
+  const fabric = +document.getElementById("fabric").value;
+  const finish = +document.getElementById("finish").value;
 
-  Object.assign(state,{I,Y,P,C,D2,op,dm,classISO});
-  updateUI();
-  updateAnalysis();
+  const res = computeModel(fiber, yarn, fabric, finish);
+
+  document.getElementById("iso").innerText = "ISO Class: " + res.iso;
+  document.getElementById("score").innerText = "Score: " + res.score.toFixed(2);
+
+  document.getElementById("cost").innerText = "Cost: " + res.cost.toFixed(1);
+  document.getElementById("energy").innerText = "Energy: " + res.energy.toFixed(1);
+  document.getElementById("comfort").innerText = "Comfort: " + res.comfort.toFixed(1);
+
+  document.getElementById("fiberBar").style.width = (res.influence.fiber*100) + "%";
+  document.getElementById("yarnBar").style.width = (res.influence.yarn*100) + "%";
+  document.getElementById("fabricBar").style.width = (res.influence.fabric*100) + "%";
+  document.getElementById("finishBar").style.width = (res.influence.finish*100) + "%";
 }
 
-function calcI(p){
-  const polyRisk=(p.poly-30)/50;
-  const dtexRisk=1-(p.dtex-8)/22;
-  const twistProt=(p.twist-300)/900;
-  return Math.min(1,Math.max(0,(polyRisk*0.45+dtexRisk*0.35+(1-twistProt)*0.20)*p.fiber));
-}
-function calcY(p){
-  const densityProt=Math.min(1,(p.weft+p.warp)/80);
-  const gsmProt=Math.min(1,p.gsm/300);
-  return Math.min(1,Math.max(0,(1-densityProt)*0.4+(1-gsmProt)*0.3+p.weave*0.3));
-}
-function calcP(p){
-  const tempRisk=(p.dyeT-80)/65;
-  const phRisk=Math.abs(p.ph-5.5)/3.5;
-  return Math.min(1,Math.max(0,tempRisk*0.65+phRisk*0.35));
-}
-function calcC(p){
-  const antiProt=p.anti/3;
-  const mechProt=p.mech;
-  const sanfProt=(p.sanf-120)/100;
-  return Math.min(1,Math.max(0,(1-antiProt)*0.45+(1-mechProt)*0.35+(1-sanfProt)*0.20));
-}
+// Event listeners
+document.querySelectorAll("input").forEach(el => {
+  el.addEventListener("input", update);
+});
 
-function updateUI(){
-  const{classISO,dm,op,D2,I,Y,P,C}=state;
-  const cls=Math.max(1,Math.min(5,Math.round(classISO)));
-  const cc={1:'var(--class1)',2:'var(--class2)',3:'var(--class3)',4:'var(--class4)',5:'var(--class5)'};
-  const col=cc[cls];
+// Initial run
+update();
 
-  document.getElementById('h-class').textContent=classISO.toFixed(1);
-  document.getElementById('h-class').style.color=col;
-  document.getElementById('h-d2').textContent=dm.toFixed(3);
-  document.getElementById('h-op').textContent=op.toFixed(3);
-
-  const ring=document.getElementById('class-ring');
-  ring.className='class-ring iso-'+cls;
-  document.getElementById('class-num').textContent=classISO.toFixed(1);
-
-  document.querySelectorAll('#iso-scale .iso-step').forEach((s,i)=>{s.className='iso-step';if(i<cls)s.classList.add('active-'+cls);});
-
-  const labels={1:'Pilling SEVERO · Reprovado',2:'Pilling ALTO · Reprovado',3:'Pilling MODERADO · No limite',4:'Pilling BAIXO · Aprovado ✓',5:'Pilling MÍNIMO · Excelente ✓'};
-  document.getElementById('class-label').textContent=labels[cls];
-
-  const dmPct=Math.min(100,dm/1.5*100);
-  const dmCol=dm<0.3?'var(--teal)':dm<0.8?'var(--amber)':dm<1.2?'var(--coral)':'#f87171';
-  document.getElementById('dm-val').textContent=dm.toFixed(3);
-  document.getElementById('dm-fill').style.width=dmPct+'%';
-  document.getElementById('dm-fill').style.background=dmCol;
-
-  document.getElementById('op-val').textContent=op.toFixed(3);
-  document.getElementById('op-fill').style.width=(op*100)+'%';
-
-  let regime,rbCls;
-  if(dm<0.3){regime='INACTIVE · Excelente';rbCls='rb-inactive';}
-  else if(dm<0.8){regime='ATTENUATING · Monitorar';rbCls='rb-attn';}
-  else if(dm<1.2){regime='SUPPRESSING · Revisar';rbCls='rb-supp';}
-  else{regime='TOTAL BLOCKING · Crítico';rbCls='rb-block';}
-  const badge=document.getElementById('regime-badge');
-  badge.className='regime-badge '+rbCls;
-  badge.innerHTML=`<span class="live-dot" style="background:${dmCol}"></span> ${regime}`;
-
-  const tot=I*I+Y*Y+P*P+C*C+2*I*Y+2*Y*C+2*I*C||0.001;
-  const e1c=(I*I+I*Y+I*C)/tot,e2c=(Y*Y+I*Y+Y*C)/tot,e3c=P*P/tot,e4c=(C*C+Y*C+I*C)/tot;
-  const s=e1c+e2c+e3c+e4c||0.001;
-  const ie1=Math.round(e1c/s*100),ie2=Math.round(e2c/s*100),ie3=Math.round(e3c/s*100),ie4=Math.max(0,100-ie1-ie2-ie3);
-  setInf('e1',ie1);setInf('e2',ie2);setInf('e3',ie3);setInf('e4',ie4);
-
-  document.getElementById('ct-iy').textContent=(2*I*Y).toFixed(3);
-  document.getElementById('ct-yc').textContent=(2*Y*C).toFixed(3);
-  document.getElementById('ct-ic').textContent=(2*I*C).toFixed(3);
-  document.getElementById('ct-d2').textContent=D2.toFixed(3);
-
-  document.getElementById('d-op-dash').textContent=op.toFixed(3);
-  document.getElementById('d-dm-dash').textContent=dm.toFixed(3);
-}
-
-function updateAnalysis(){
-  const{I,Y,P,C,D2,op}=state;
-  const tot=D2||0.001;
-  const contribs=[I*I,Y*Y,P*P,C*C,2*I*Y,2*Y*C,2*I*C];
-  const ids=['ap-I','ap-Y','ap-P','ap-C','ap-IY','ap-YC','ap-IC'];
-  const cidx=['ap-I-c','ap-Y-c','ap-P-c','ap-C-c','ap-IY-c','ap-YC-c','ap-IC-c'];
-  const vals=[I,Y,P,C,2*I*Y,2*Y*C,2*I*C];
-  ids.forEach((id,i)=>document.getElementById(id).textContent=vals[i].toFixed(3));
-  cidx.forEach((id,i)=>document.getElementById(id).textContent=(contribs[i]/tot*100).toFixed(1)+'%');
-  document.getElementById('an-d2').textContent=D2.toFixed(4);
-  document.getElementById('an-op').textContent=op.toFixed(4);
-  const sig=Math.min(0.99,0.3+state.dm*0.4);
-  const phi=Math.min(0.99,state.P*0.8);
-  document.getElementById('sigma-val').textContent=sig.toFixed(2);
-  document.getElementById('sigma-fill').style.width=(sig*100)+'%';
-  document.getElementById('phi-val').textContent=phi.toFixed(2);
-  document.getElementById('phi-fill').style.width=(phi*100)+'%';
-}
-
-function setInf(id,pct){
-  document.getElementById('inf-'+id).textContent=pct+'%';
-  document.getElementById('if-'+id).style.width=pct+'%';
-}
-
-function simulate(){
-  recalc();
-  const{classISO,dm,op,params}=state;
-  const cls=Math.max(1,Math.min(5,Math.round(classISO)));
-  const entry={id:Date.now(),ts:new Date().toLocaleTimeString('pt-BR'),classISO:classISO.toFixed(1),cls,dm:dm.toFixed(3),op:op.toFixed(3),label:`PES ${params.poly}% · ${params.twist}TPM · ${params.gsm}g/m²`,pass:cls>=3};
-  state.history.unshift(entry);
-  if(state.history.length>20)state.history.pop();
-  renderHistory();
-  updateDashMetrics();
-  showToast(`Classe ISO ${entry.classISO} · ${entry.pass?'✓ Aprovado':'✗ Reprovado'}`);
-  refreshCharts();
-}
-
-function renderHistory(){
-  const list=document.getElementById('history-list');
-  if(!state.history.length)return;
-  const cc={1:'var(--class1)',2:'var(--class2)',3:'var(--class3)',4:'var(--class4)',5:'var(--class5)'};
-  list.innerHTML=state.history.map(h=>`<div class="hist-item"><div class="hist-class" style="background:${cc[h.cls]}22;color:${cc[h.cls]};border:1px solid ${cc[h.cls]}44">${h.classISO}</div><div class="hist-info"><div class="hist-name">${h.label}</div><div class="hist-meta">D/M*=${h.dm} · O(D²)=${h.op} · ${h.ts}</div></div><div style="font-size:11px;font-weight:600;color:${h.pass?'var(--teal)':'var(--coral)'}">${h.pass?'✓ OK':'✗ NOK'}</div></div>`).join('');
-  if(state.history.length>=2){
-    const best=state.history.reduce((a,b)=>parseFloat(a.classISO)>parseFloat(b.classISO)?a:b);
-    const worst=state.history.reduce((a,b)=>parseFloat(a.classISO)<parseFloat(b.classISO)?a:b);
-    document.getElementById('compare-panel').innerHTML=`<div style="margin-bottom:12px;"><div style="font-size:10px;color:var(--teal);font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Melhor cenário</div><div style="font-family:var(--mono);font-size:26px;font-weight:700;color:var(--class4)">${best.classISO}</div><div style="font-size:11px;color:var(--muted);margin-top:3px;">${best.label}</div></div><hr class="sep"><div><div style="font-size:10px;color:var(--coral);font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Pior cenário</div><div style="font-family:var(--mono);font-size:26px;font-weight:700;color:var(--class1)">${worst.classISO}</div><div style="font-size:11px;color:var(--muted);margin-top:3px;">${worst.label}</div></div>`;
-  }
-}
-
-function updateDashMetrics(){
-  if(!state.history.length)return;
-  const avg=state.history.reduce((s,h)=>s+parseFloat(h.classISO),0)/state.history.length;
-  const pass=state.history.filter(h=>h.pass).length;
-  const cc={1:'var(--class1)',2:'var(--class2)',3:'var(--class3)',4:'var(--class4)',5:'var(--class5)'};
-  const avgC=Math.max(1,Math.min(5,Math.round(avg)));
-  document.getElementById('d-avg-class').textContent=avg.toFixed(1);
-  document.getElementById('d-avg-class').style.color=cc[avgC];
-  document.getElementById('d-pass').textContent=pass+'/'+state.history.length;
-}
-
-let charts={};
-function initCharts(){
-  if(charts._init){refreshCharts();return;}
-  charts._init=true;
-  const gc='rgba(255,255,255,0.05)',tc='#6b7a99';
-
-  const hd=[3.2,2.8,3.5,4.1,3.7,3.2,2.6,3.0,3.8,4.2];
-  charts.history=new Chart(document.getElementById('chart-history'),{type:'line',data:{labels:['S1','S2','S3','S4','S5','S6','S7','S8','S9','S10'],datasets:[{label:'Classe ISO',data:hd,borderColor:'#7c6fe0',backgroundColor:'rgba(124,111,224,0.1)',borderWidth:2,fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:hd.map(v=>v>=3?'#1db975':'#e24b4a')},{label:'Mínimo (3)',data:Array(10).fill(3),borderColor:'#f59e0b',borderWidth:1,borderDash:[4,4],fill:false,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:1,max:5,grid:{color:gc},ticks:{color:tc,font:{size:10}}},x:{grid:{display:false},ticks:{color:tc,font:{size:10}}}},plugins:{legend:{labels:{color:tc,font:{size:10},boxWidth:12}}}}});
-
-  charts.stages=new Chart(document.getElementById('chart-stages'),{type:'bar',data:{labels:['E1 Fiação','E2 Tecelagem','E3 Tinturaria','E4 Acabamento'],datasets:[{label:'D²',data:[state.I*state.I+state.I*state.Y+state.I*state.C,state.Y*state.Y+state.I*state.Y+state.Y*state.C,state.P*state.P,state.C*state.C+state.Y*state.C+state.I*state.C],backgroundColor:['rgba(124,111,224,0.7)','rgba(29,185,117,0.7)','rgba(59,138,221,0.7)','rgba(245,158,11,0.7)'],borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{grid:{color:gc},ticks:{color:tc,font:{size:10}}},x:{grid:{display:false},ticks:{color:tc,font:{size:10}}}},plugins:{legend:{display:false}}}});
-
-  charts.radar=new Chart(document.getElementById('chart-radar'),{type:'radar',data:{labels:['% Poliéster','Torção','Finura','Densidade','Acabamento','Temp. Dye'],datasets:[{label:'Perfil atual',data:[state.params.poly/80*100,state.params.twist/1200*100,(30-state.params.dtex)/22*100+20,(state.params.weft+state.params.warp)/110*100,state.params.anti/3*100,(145-state.params.dyeT)/65*100],backgroundColor:'rgba(124,111,224,0.15)',borderColor:'#7c6fe0',borderWidth:2,pointBackgroundColor:'#7c6fe0',pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,grid:{color:gc},ticks:{display:false},pointLabels:{color:tc,font:{size:10}}}},plugins:{legend:{display:false}}}});
-
-  charts.scatter=new Chart(document.getElementById('chart-scatter'),{type:'scatter',data:{datasets:[{label:'Cenários',data:[{x:400,y:38},{x:600,y:30},{x:800,y:24},{x:1000,y:20},{x:500,y:45},{x:700,y:35},{x:900,y:28},{x:650,y:32}],backgroundColor:['#e24b4a','#f59e0b','#1db975','#1db975','#e24b4a','#f59e0b','#1db975','#f59e0b'],pointRadius:7}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Torção (TPM)',color:tc,font:{size:10}},grid:{color:gc},ticks:{color:tc,font:{size:10}}},y:{title:{display:true,text:'% Poliéster',color:tc,font:{size:10}},grid:{color:gc},ticks:{color:tc,font:{size:10}}}},plugins:{legend:{display:false}}}});
-}
-
-function refreshCharts(){
-  if(!charts._init)return;
-  const{I,Y,P,C}=state;
-  charts.stages.data.datasets[0].data=[I*I+I*Y+I*C,Y*Y+I*Y+Y*C,P*P,C*C+Y*C+I*C];
-  charts.stages.update();
-  charts.radar.data.datasets[0].data=[state.params.poly/80*100,state.params.twist/1200*100,(30-state.params.dtex)/22*100+20,(state.params.weft+state.params.warp)/110*100,state.params.anti/3*100,(145-state.params.dyeT)/65*100];
-  charts.radar.update();
-  if(state.history.length){
-    const hd=state.history.slice().reverse().map(h=>parseFloat(h.classISO));
-    const hl=state.history.slice().reverse().map((_,i)=>'S'+(i+1));
-    charts.history.data.labels=hl;
-    charts.history.data.datasets[0].data=hd;
-    charts.history.data.datasets[0].pointBackgroundColor=hd.map(v=>v>=3?'#1db975':'#e24b4a');
-    charts.history.data.datasets[1].data=Array(hd.length).fill(3);
-    charts.history.update();
-    // add scatter point for last sim
-    const last=state.history[0];
-    charts.scatter.data.datasets[0].data.push({x:state.params.twist,y:state.params.poly});
-    charts.scatter.data.datasets[0].backgroundColor.push(last.pass?'#1db975':'#e24b4a');
-    charts.scatter.update();
-  }
-}
-
-function buildWeightGrid(){
-  const ws=[{name:'% Poliéster',w:45,stage:'E1',color:'var(--purple)'},{name:'Torção (TPM)',w:20,stage:'E1',color:'var(--purple)'},{name:'Finura dtex',w:35,stage:'E1',color:'var(--purple)'},{name:'Densidade trama',w:25,stage:'E2',color:'var(--teal)'},{name:'Densidade urdume',w:25,stage:'E2',color:'var(--teal)'},{name:'Massa gsm',w:20,stage:'E2',color:'var(--teal)'},{name:'Armação',w:30,stage:'E2',color:'var(--teal)'},{name:'Temp. Tintura',w:65,stage:'E3',color:'var(--blue)'},{name:'pH banho',w:35,stage:'E3',color:'var(--blue)'},{name:'Antifrizz',w:45,stage:'E4',color:'var(--amber)'},{name:'Acab. Mecânico',w:35,stage:'E4',color:'var(--amber)'},{name:'Sanforização',w:20,stage:'E4',color:'var(--amber)'}];
-  document.getElementById('weight-grid').innerHTML=ws.map(p=>`<div class="metric-card" style="border-left:2px solid ${p.color}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-size:12px;font-weight:500;">${p.name}</span><span style="font-size:9px;background:${p.color}22;color:${p.color};padding:1px 6px;border-radius:10px;">${p.stage}</span></div><div class="dm-track"><div class="dm-fill" style="width:${p.w}%;background:${p.color}"></div></div><div style="font-family:var(--mono);font-size:12px;color:${p.color};margin-top:4px;">${p.w}%</div></div>`).join('');
-}
-
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
-}
-
-recalc();
-buildWeightGrid();
 </script>
+
 </body>
 </html>
